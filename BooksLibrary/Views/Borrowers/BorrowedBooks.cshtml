@@ -1,0 +1,46 @@
+﻿@model IEnumerable<BooksLibrary.Models.BorrowedBook>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>@ViewData["Borrower"]</h1>
+<h2>Borrowered Books</h2>
+
+
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ShelfBook.Ispn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BorrowDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ReturnDate)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ShelfBook.Ispn)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BorrowDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ReturnDate)
+                </td>
+                <td>
+                    <a asp-action="ReturnBook" asp-route-id="@item.Id">Return book</a> 
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

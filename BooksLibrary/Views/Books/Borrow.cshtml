@@ -1,0 +1,228 @@
+﻿@model BooksLibrary.Models.Book
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Borrow book</h1>
+
+<form class="row" action="Borrow" method="post">
+    <div class="col-6">
+        <h4>Book</h4>
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="Title" class="control-label"></label>
+                    <input asp-for="Title" class="form-control" readonly />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Description" class="control-label"></label>
+                        <input asp-for="Description" class="form-control" readonly/>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Author" class="control-label"></label>
+                        <input asp-for="Author" class="form-control" readonly/>
+                        <span asp-validation-for="Author" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="NumberOfBooks" class="control-label"></label>
+                        <input class="form-control" id="NumberOfBooks" value="1"/>
+                        <span asp-validation-for="NumberOfBooks" class="text-danger" id="BooksError"></span>
+                    </div>
+                    <br />
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col-6">
+        <h4>Borrower</h4>
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="Name" class="control-label">Name</label>
+                    <input type="text" id="Name" class="form-control" />
+                    <span id="NameError" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="Phone" class="control-label">Phone</label>
+                    <input type="text" id="Phone" class="form-control" />
+                    <span id="PhoneError" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="StartDate" class="control-label">Borrowing Date</label>
+                    <input type="date" id="StartDate" class="form-control" />
+                    <span id="StartDateError" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="EndDate" class="control-label">Return Date</label>
+                    <input type="date" id="EndDate" class="form-control" />
+                    <span id="EndDateError" class="text-danger"></span>
+                </div>
+
+                    <br />
+            </div>
+
+        </div>
+    </div>
+    <div class="form-group">
+        @*<input type="submit" value="Make Borrow" class="btn btn-primary" id="submitButton" />*@
+        <button id="submitButton" class="btn btn-primary">Submit</button>
+
+    </div>
+
+</form>
+
+
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+
+
+<script>
+    var BorrowerId = 1;
+    var PhoneNum = "";
+    var BorrowerName = "";
+    $(document).ready(function () {
+        $('#Phone').on('input', function () { // Use the 'input' event instead of 'click' to detect text changes
+            var searchText = $(this).val();
+
+            $.ajax({
+                url: '@Url.Action("GetBorrower", "Books")', // URL of the controller action
+                type: 'GET', // HTTP method (GET, POST, etc.)
+                dataType: 'json', // Expected data type
+                data: {
+                    searchText: searchText // Pass the text as a parameter
+                },
+                success: function (data) {
+                    console.log(data);
+                    BorrowerId = data.id;
+                    PhoneNum = data.phone;
+                    BorrowerName = data.name;
+                    $('#Name').val(data.name);
+                    // Code to handle the returned data
+                },
+                error: function (xhr, status, error) {
+                    // Code to handle errors
+                }
+            });
+        });
+        $('#Phone').on('keyup', function (event) {
+            if (event.keyCode === 13) { // Check if the Enter key is pressed
+                var searchText = $(this).val();
+
+                $.ajax({
+                    url: '@Url.Action("GetBorrower", "Books")', // URL of the controller action
+                    type: 'GET', // HTTP method (GET, POST, etc.)
+                    dataType: 'json', // Expected data type
+                    data: {
+                        searchText: searchText // Pass the text as a parameter
+                    },
+                    success: function (data) {
+                        $('#Name').val(data.name);
+                        $('#Phone').val(data.phone);
+                        // Code to handle the returned data
+                    },
+                    error: function (xhr, status, error) {
+                        // Code to handle errors
+                    }
+                });
+            }
+        });
+
+        $('#submitButton').click(function (event) { // Assuming you have a submit button with id 'submitButton'
+            event.preventDefault();
+            var name = $('#Name').val();
+            var phone = $('#Phone').val();
+            var startDate = $('#StartDate').val();
+            var endDate = $('#EndDate').val();
+            var availableBooks = "@Model.NumberOfBooks";
+
+            // Clear previous error messages
+            $('#NameError').text('');
+            $('#PhoneError').text('');
+            $('#StartDateError').text('');
+            $('#EndDateError').text('');
+            $('#BooksError').text('');
+
+            // Perform validation checks
+            var isValid = true;
+
+            if (name.trim() === '') {
+                $('#NameError').text('Name is required.');
+                isValid = false;
+            }
+
+            if (phone.trim() === '') {
+                $('#PhoneError').text('Phone is required.');
+                isValid = false;
+            }
+
+            if (startDate.trim() === '') {
+                $('#StartDateError').text('Start Date is required.');
+                isValid = false;
+            }
+
+            if (endDate.trim() === '') {
+                $('#EndDateError').text('End Date is required.');
+                isValid = false;
+            }
+            if ($('#NumberOfBooks').val()<1){
+                $('#BooksError').text('minimum number should be 1 book');
+                isValid = false;
+            }
+            if ($('#NumberOfBooks').val() > availableBooks) {
+                console.log(availableBooks);
+                console.log($('#NumberOfBooks').val());
+
+                $('#BooksError').text('not enough books available!');
+                isValid = false;
+            }
+            // Submit the form if all checks pass
+
+            if (isValid) {
+                var url = '@Url.Action("MakeBorrow", "Books")' + '?' +
+                    'borrowerId=' + encodeURIComponent(BorrowerId) + '&' +
+                    'bookId=' + encodeURIComponent(@Model.Id) + '&' +
+                    'start=' + encodeURIComponent($('#StartDate').val()) + '&' +
+                    'end=' + encodeURIComponent($('#EndDate').val()) + '&' +
+                    'quantity=' + encodeURIComponent($('#NumberOfBooks').val());
+                $.ajax({
+                    url: url, // URL of the controller action
+                    type: 'POST', // HTTP method (GET, POST, etc.)
+                    dataType: 'json', // Expected data type
+                    success: function (data) {
+                        response(data); // Provide the response data to the Autocomplete plugin
+                        $.ajax({
+                            url: '@Url.Action("Index", "Books")',
+                            type: 'GET', 
+                            dataType: 'json',
+                            success: function () {},
+                            error: function (xhr, status, error) {}
+                        })
+                    },
+                    error: function (xhr, status, error) {
+                        // Code to handle errors
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+@*@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}*@
+
